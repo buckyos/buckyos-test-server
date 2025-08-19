@@ -74,6 +74,23 @@ async function startServer() {
     }
   });
 
+    router.post('/version/pack', async (ctx) => {
+    const { version, os, arch, packed } = ctx.request.body.content;
+    if (!version || !os || !arch || typeof packed !== 'boolean') {
+      ctx.status = 400;
+      ctx.body = { error: 'Missing required fields' };
+      return;
+    }
+
+    try {
+      await storage.setVersionPackResult(version, os, arch, packed);
+      ctx.body = { result: 1 };
+    } catch (error) {
+      ctx.status = 500;
+      ctx.body = { error: 'Failed to set version publish result' };
+    }
+  });
+
   router.get("/version", async (ctx) => {
     const query = ctx.request.query;
     let pageNum = parseInt(query.page as string) || 1;

@@ -23,6 +23,7 @@ export class Storage {
             "arch"	TEXT NOT NULL,
             "tested"	INTEGER NOT NULL DEFAULT 0,
             "published"	INTEGER NOT NULL DEFAULT 0,
+            "packed"	INTEGER NOT NULL DEFAULT 0,
             "url"	TEXT NOT NULL,
             PRIMARY KEY("version","os","arch")
         )`);
@@ -66,7 +67,17 @@ export class Storage {
         );
     }
 
-    public async getVersions(pageNum: number, pageSize: number, version: string| undefined, os: string[] | undefined, arch: string[] | undefined, notest: boolean, nopub: boolean) {
+    public async setVersionPackResult(version: string, os: string, arch: string, packed: boolean) {
+        if (!this.db) {
+            throw new Error("Database not initialized");
+        }
+        await this.db.run(
+            `UPDATE versions SET published = ? WHERE version = ? AND os = ? AND arch = ?`,
+            packed ? 1 : -1, version, os, arch
+        );
+    }
+
+    public async getVersions(pageNum: number, pageSize: number, version: string| undefined, os: string[] | undefined, arch: string[] | undefined, notest: boolean, nopub: boolean, nopack: boolean) {
         if (!this.db) {
             throw new Error("Database not initialized");
         }
@@ -94,6 +105,10 @@ export class Storage {
 
         if (nopub) {
             query += ` AND published = 0`;
+        }
+
+        if (nopub) {
+            query += ` AND packed = 0`;
         }
 
         query += ` ORDER BY version DESC`;
