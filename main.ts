@@ -3,6 +3,7 @@ import Router from '@koa/router';
 import bodyParser from '@koa/bodyparser';
 import { authComponent } from './auth';
 import { Storage } from './storage';
+import { adjustOsAndArch } from './util';
 
 async function startServer() {
   const app = new Koa();
@@ -14,6 +15,7 @@ async function startServer() {
   app.use(bodyParser());
 
   app.use(authComponent(storage));
+  app.use(adjustOsAndArch());
 
   // Define a simple route
   router.post('/version/auth', (ctx) => {
