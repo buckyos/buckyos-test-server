@@ -132,6 +132,10 @@ async function startServer() {
     }
   })
 
+  router.get("/version/latest/commit", async (ctx) => {
+    ctx.body = await storage.getLatestCommit()
+  })
+
   app.use(router.routes()).use(router.allowedMethods());
 
   app.listen(9800, "localhost", () => {
