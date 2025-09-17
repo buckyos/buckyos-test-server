@@ -26,15 +26,15 @@ async function startServer() {
   });
 
   router.post('/version/url', async (ctx) => {
-    const { version, os, arch, url } = ctx.request.body.content;
-    if (!version || !os || !arch || !url) {
+    const { version, os, arch, url, commit } = ctx.request.body.content;
+    if (!version || !os || !arch || !url || !commit) {
       ctx.status = 400;
       ctx.body = { error: 'Missing required fields' };
       return;
     }
 
     try {
-      await storage.setVersionUrl(version, os, arch, url);
+      await storage.setVersionUrl(version, os, arch, url, commit);
       ctx.body = { result: 1 };
     } catch (error) {
       ctx.status = 500;
@@ -117,7 +117,7 @@ async function startServer() {
     let nopub = query.nopub === 'true' ? true : false;
     let nopack = query.nopack === 'true' ? true : false;
 
-    let versions = await storage.getVersions(pageNum, pageSize, query.version as string, os, arch, notest, nopub, nopack);
+    let versions = await storage.getVersions(pageNum, pageSize, query.version as string, os, arch, query.commit as string, notest, nopub, nopack);
 
     ctx.body = {
       items: versions,

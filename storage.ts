@@ -25,6 +25,7 @@ export class Storage {
             "published"	INTEGER NOT NULL DEFAULT 0,
             "packed"	INTEGER NOT NULL DEFAULT 0,
             "url"	TEXT NOT NULL,
+            "commit_sha" TEXT NOT NULL,
             PRIMARY KEY("version","os","arch")
         )`);
     }
@@ -37,13 +38,13 @@ export class Storage {
         return result?.private_key
     }
 
-    public async setVersionUrl(version: string, os: string, arch: string, url: string) {
+    public async setVersionUrl(version: string, os: string, arch: string, url: string, commit: string) {
         if (!this.db) {
             throw new Error("Database not initialized");
         }
         await this.db.run(
-            `INSERT OR REPLACE INTO versions (version, os, arch, url) VALUES (?, ?, ?, ?)`,
-            version, os, arch, url
+            `INSERT OR REPLACE INTO versions (version, os, arch, url, commit_sha) VALUES (?, ?, ?, ?, ?)`,
+            version, os, arch, url, commit
         );
     }
 
@@ -77,7 +78,7 @@ export class Storage {
         );
     }
 
-    public async getVersions(pageNum: number, pageSize: number, version: string| undefined, os: string[] | undefined, arch: string[] | undefined, notest: boolean, nopub: boolean, nopack: boolean) {
+    public async getVersions(pageNum: number, pageSize: number, version: string| undefined, os: string[] | undefined, arch: string[] | undefined, commit: string|undefined, notest: boolean, nopub: boolean, nopack: boolean) {
         if (!this.db) {
             throw new Error("Database not initialized");
         }
@@ -87,6 +88,11 @@ export class Storage {
         if (version) {
             query += ` AND version = ?`;
             params.push(version);
+        }
+
+        if (commit) {
+            query += ` AND commit_sha = ?`;
+            params.push(commit);
         }
 
         if (os && os.length > 0) {
@@ -129,6 +135,15 @@ export class Storage {
         return result.count;
 
     }
+
+    public async getLatestCommit(): Promise<string | undefined> {
+        if (!this.db) {
+            throw new Error("Database not initialized");
+        }
+        const result = await this.db.get<{ commit: string }>("SELECT commit FROM versions ORDER BY version DESC LIMIT 1");
+        return result?.commit;
+    }
+
     public async close() {
         await this.db!.close();
     }
