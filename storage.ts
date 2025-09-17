@@ -140,7 +140,7 @@ export class Storage {
         if (!this.db) {
             throw new Error("Database not initialized");
         }
-        const result = await this.db.get<{ commit: string }>("SELECT commit FROM versions ORDER BY version DESC LIMIT 1");
+        const result = await this.db.get<{ commit: string }>("SELECT 'commit' FROM versions ORDER BY version DESC LIMIT 1");
         return result?.commit;
     }
 
