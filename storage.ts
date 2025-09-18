@@ -73,7 +73,7 @@ export class Storage {
             throw new Error("Database not initialized");
         }
         await this.db.run(
-            `UPDATE versions SET published = ? WHERE version = ? AND os = ? AND arch = ?`,
+            `UPDATE versions SET packed = ? WHERE version = ? AND os = ? AND arch = ?`,
             packed ? 1 : -1, version, os, arch
         );
     }
