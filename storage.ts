@@ -113,7 +113,7 @@ export class Storage {
             query += ` AND published = 0`;
         }
 
-        if (nopub) {
+        if (nopack) {
             query += ` AND packed = 0`;
         }
 
