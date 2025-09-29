@@ -128,6 +128,26 @@ async function setPack() {
     await postData("/version/pack", content);
 }
 
+async function setPackTested() {
+    let version = argv[3];
+    let os = argv[4];
+    let arch = argv[5];
+    let tested = argv[6] === "true";
+    if (!version || !os || !arch) {
+        console.error("Usage: node client.js setpacktest <version> <os> <arch> <true|false>");
+        process.exit(1);
+    }
+
+    let content = {
+        version: version,
+        os: os,
+        arch: arch,
+        tested: tested,
+    }
+
+    await postData("/version/packtest", content);
+}
+
 async function test_auth() {
     let content = {
         msg: "this is a test message",
@@ -146,10 +166,12 @@ async function run() {
         await setPublish();
     } else if (method == "setpack") {
         await setPack();
+    } else if (method == "setpacktest") {
+        await setPackTested();
     } else if (method == "auth") {
         await test_auth();
     } else {
-        console.error("Usage: node client.js <seturl|settest|setpublish|setpack>");
+        console.error("Usage: node client.js <seturl|settest|setpublish|setpack|setpacktest>");
         process.exit(1);
     }
 }

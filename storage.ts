@@ -24,6 +24,7 @@ export class Storage {
             "tested"	INTEGER NOT NULL DEFAULT 0,
             "published"	INTEGER NOT NULL DEFAULT 0,
             "packed"	INTEGER NOT NULL DEFAULT 0,
+            "pack_tested" INTEGER NOT NULL DEFAULT 0,
             "url"	TEXT NOT NULL,
             "commit_sha" TEXT NOT NULL,
             PRIMARY KEY("version","os","arch")
@@ -75,6 +76,16 @@ export class Storage {
         await this.db.run(
             `UPDATE versions SET packed = ? WHERE version = ? AND os = ? AND arch = ?`,
             packed ? 1 : -1, version, os, arch
+        );
+    }
+
+    public async setVersionPackTestResult(version: string, os: string, arch: string, pack_tested: boolean) {
+        if (!this.db) {
+            throw new Error("Database not initialized");
+        }
+        await this.db.run(
+            `UPDATE versions SET pack_tested = ? WHERE version = ? AND os = ? AND arch = ?`,
+            pack_tested ? 1 : -1, version, os, arch
         );
     }
 

@@ -20,6 +20,7 @@
     "@koa/bodyparser": "^6.0.0",
     "@koa/router": "^13.1.0",
     "koa": "^3.0.0",
+    "koa-body": "^6.0.1",
     "promised-sqlite3": "^2.1.0",
     "secp256k1": "^5.0.1",
     "sqlite3": "^5.1.7",
