@@ -26,15 +26,15 @@ async function startServer() {
     });
 
     router.post('/version/url', async (ctx) => {
-        const { version, os, arch, url, commit } = ctx.request.body.content;
-        if (!version || !os || !arch || !url || !commit) {
+        const { product, version, os, arch, url, commit } = ctx.request.body.content;
+        if (!product || !version || !os || !arch || !url || !commit) {
             ctx.status = 400;
             ctx.body = { error: 'Missing required fields' };
             return;
         }
 
         try {
-            await storage.setVersionUrl(version, os, arch, url, commit);
+            await storage.setVersionUrl(product, version, os, arch, url, commit);
             ctx.body = { result: 1 };
         } catch (error) {
             ctx.status = 500;
@@ -43,15 +43,15 @@ async function startServer() {
     })
 
     router.post('/version/test', async (ctx) => {
-        const { version, os, arch, tested } = ctx.request.body.content;
-        if (!version || !os || !arch || typeof tested !== 'boolean') {
+        const { product, version, os, arch, tested } = ctx.request.body.content;
+        if (!product || !version || !os || !arch || typeof tested !== 'boolean') {
             ctx.status = 400;
             ctx.body = { error: 'Missing required fields' };
             return;
         }
 
         try {
-            await storage.setVersionTestResult(version, os, arch, tested);
+            await storage.setVersionTestResult(product,version, os, arch, tested);
             ctx.body = { result: 1 };
         } catch (error) {
             ctx.status = 500;
@@ -60,15 +60,15 @@ async function startServer() {
     });
 
     router.post('/version/publish', async (ctx) => {
-        const { version, os, arch, published } = ctx.request.body.content;
-        if (!version || !os || !arch || typeof published !== 'boolean') {
+        const { product, version, os, arch, published } = ctx.request.body.content;
+        if (!product || !version || !os || !arch || typeof published !== 'boolean') {
             ctx.status = 400;
             ctx.body = { error: 'Missing required fields' };
             return;
         }
 
         try {
-            await storage.setVersionPublishResult(version, os, arch, published);
+            await storage.setVersionPublishResult(product, version, os, arch, published);
             ctx.body = { result: 1 };
         } catch (error) {
             ctx.status = 500;
@@ -77,15 +77,15 @@ async function startServer() {
     });
 
     router.post('/version/pack', async (ctx) => {
-        const { version, os, arch, packed } = ctx.request.body.content;
-        if (!version || !os || !arch || typeof packed !== 'boolean') {
+        const { product, version, os, arch, packed } = ctx.request.body.content;
+        if (!product || !version || !os || !arch || typeof packed !== 'boolean') {
             ctx.status = 400;
             ctx.body = { error: 'Missing required fields' };
             return;
         }
 
         try {
-            await storage.setVersionPackResult(version, os, arch, packed);
+            await storage.setVersionPackResult(product, version, os, arch, packed);
             ctx.body = { result: 1 };
         } catch (error) {
             ctx.status = 500;
@@ -94,15 +94,15 @@ async function startServer() {
     });
 
     router.post('/version/packtest', async (ctx) => {
-        const { version, os, arch, tested } = ctx.request.body.content;
-        if (!version || !os || !arch || typeof tested !== 'boolean') {
+        const { product, version, os, arch, tested } = ctx.request.body.content;
+        if (!product || !version || !os || !arch || typeof tested !== 'boolean') {
             ctx.status = 400;
             ctx.body = { error: 'Missing required fields' };
             return;
         }
 
         try {
-            await storage.setVersionPackTestResult(version, os, arch, tested);
+            await storage.setVersionPackTestResult(product, version, os, arch, tested);
             ctx.body = { result: 1 };
         } catch (error) {
             ctx.status = 500;
@@ -134,7 +134,7 @@ async function startServer() {
         let nopub = query.nopub === 'true' ? true : false;
         let nopack = query.nopack === 'true' ? true : false;
 
-        let versions = await storage.getVersions(pageNum, pageSize, query.version as string, os, arch, query.commit as string, notest, nopub, nopack);
+        let versions = await storage.getVersions(pageNum, pageSize, query.product as string, query.version as string, os, arch, query.commit as string, notest, nopub, nopack);
 
         ctx.body = {
             items: versions,
@@ -145,12 +145,12 @@ async function startServer() {
 
     router.get("/version/total", async (ctx) => {
         ctx.body = {
-            total: await storage.getVersionCount()
+            total: await storage.getVersionCount(ctx.request.query.product as string)
         }
     })
 
     router.get("/version/latest/commit", async (ctx) => {
-        ctx.body = await storage.getLatestCommit()
+        ctx.body = await storage.getLatestCommit(ctx.request.query.product as string)
     })
 
     app.use(router.routes()).use(router.allowedMethods());

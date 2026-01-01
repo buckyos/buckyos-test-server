@@ -18,6 +18,7 @@ export class Storage {
         )`);
 
         await this.db.run(`CREATE TABLE IF NOT EXISTS "versions" (
+            "product"	TEXT NOT NULL,
             "version"	TEXT NOT NULL,
             "os"	TEXT NOT NULL,
             "arch"	TEXT NOT NULL,
@@ -27,7 +28,7 @@ export class Storage {
             "pack_tested" INTEGER NOT NULL DEFAULT 0,
             "url"	TEXT NOT NULL,
             "commit_sha" TEXT NOT NULL,
-            PRIMARY KEY("version","os","arch")
+            PRIMARY KEY("product", "version","os","arch")
         )`);
     }
 
@@ -39,62 +40,67 @@ export class Storage {
         return result?.private_key
     }
 
-    public async setVersionUrl(version: string, os: string, arch: string, url: string, commit: string) {
+    public async setVersionUrl(product: string,version: string, os: string, arch: string, url: string, commit: string) {
         if (!this.db) {
             throw new Error("Database not initialized");
         }
         await this.db.run(
-            `INSERT OR REPLACE INTO versions (version, os, arch, url, commit_sha) VALUES (?, ?, ?, ?, ?)`,
-            version, os, arch, url, commit
+            `INSERT OR REPLACE INTO versions (product, version, os, arch, url, commit_sha) VALUES (?, ?, ?, ?, ?, ?)`,
+            product, version, os, arch, url, commit
         );
     }
 
-    public async setVersionTestResult(version: string, os: string, arch: string, tested: boolean) {
+    public async setVersionTestResult(product: string, version: string, os: string, arch: string, tested: boolean) {
         if (!this.db) {
             throw new Error("Database not initialized");
         }
         await this.db.run(
-            `UPDATE versions SET tested = ? WHERE version = ? AND os = ? AND arch = ?`,
-            tested ? 1 : -1, version, os, arch
+            `UPDATE versions SET tested = ? WHERE product = ? AND version = ? AND os = ? AND arch = ?`,
+            tested ? 1 : -1, product, version, os, arch
         );
     }
 
-    public async setVersionPublishResult(version: string, os: string, arch: string, published: boolean) {
+    public async setVersionPublishResult(product: string, version: string, os: string, arch: string, published: boolean) {
         if (!this.db) {
             throw new Error("Database not initialized");
         }
         await this.db.run(
-            `UPDATE versions SET published = ? WHERE version = ? AND os = ? AND arch = ?`,
-            published ? 1 : -1, version, os, arch
+            `UPDATE versions SET published = ? WHERE product = ? AND version = ? AND os = ? AND arch = ?`,
+            published ? 1 : -1, product, version, os, arch
         );
     }
 
-    public async setVersionPackResult(version: string, os: string, arch: string, packed: boolean) {
+    public async setVersionPackResult(product: string, version: string, os: string, arch: string, packed: boolean) {
         if (!this.db) {
             throw new Error("Database not initialized");
         }
         await this.db.run(
-            `UPDATE versions SET packed = ? WHERE version = ? AND os = ? AND arch = ?`,
-            packed ? 1 : -1, version, os, arch
+            `UPDATE versions SET packed = ? WHERE product = ? AND version = ? AND os = ? AND arch = ?`,
+            packed ? 1 : -1, product, version, os, arch
         );
     }
 
-    public async setVersionPackTestResult(version: string, os: string, arch: string, pack_tested: boolean) {
+    public async setVersionPackTestResult(product: string, version: string, os: string, arch: string, pack_tested: boolean) {
         if (!this.db) {
             throw new Error("Database not initialized");
         }
         await this.db.run(
-            `UPDATE versions SET pack_tested = ? WHERE version = ? AND os = ? AND arch = ?`,
-            pack_tested ? 1 : -1, version, os, arch
+            `UPDATE versions SET pack_tested = ? WHERE product = ? AND version = ? AND os = ? AND arch = ?`,
+            pack_tested ? 1 : -1, product, version, os, arch
         );
     }
 
-    public async getVersions(pageNum: number, pageSize: number, version: string| undefined, os: string[] | undefined, arch: string[] | undefined, commit: string|undefined, notest: boolean, nopub: boolean, nopack: boolean) {
+    public async getVersions(pageNum: number, pageSize: number, product: string|undefined,version: string| undefined, os: string[] | undefined, arch: string[] | undefined, commit: string|undefined, notest: boolean, nopub: boolean, nopack: boolean) {
         if (!this.db) {
             throw new Error("Database not initialized");
         }
         let query = `SELECT * FROM versions WHERE 1=1`;
         const params: any[] = [];
+
+        if (product) {
+            query += ` AND product = ?`;
+            params.push(product);
+        }
 
         if (version) {
             query += ` AND version = ?`;
@@ -138,20 +144,38 @@ export class Storage {
         return await this.db.all<any[]>(query, ...params);
     }
 
-    public async getVersionCount(): Promise<number> {
+    public async getVersionCount(product: string|undefined): Promise<number> {
         if (!this.db) {
             throw new Error("Database not initialized");
         }
-        const result = await this.db.get<{ count: number }>("SELECT COUNT(*) as count FROM versions");
+        let query = "SELECT COUNT(*) as count FROM versions WHERE 1=1";
+        const params: any[] = [];
+
+        if (product) {
+            query += ` AND product = ?`;
+            params.push(product);
+        }
+
+        const result = await this.db.get<{ count: number }>(query, ...params);
         return result.count;
 
     }
 
-    public async getLatestCommit(): Promise<string | undefined> {
+    public async getLatestCommit(product: string|undefined): Promise<string | undefined> {
         if (!this.db) {
             throw new Error("Database not initialized");
         }
-        const result = await this.db.get<{ commit_sha: string }>("SELECT commit_sha FROM versions ORDER BY version DESC LIMIT 1");
+        let query = "SELECT commit_sha FROM versions WHERE 1=1";
+        const params: any[] = [];
+
+        if (product) {
+            query += " AND product = ?";
+            params.push(product);
+        }
+
+        query += " ORDER BY version DESC LIMIT 1"
+
+        const result = await this.db.get<{ commit_sha: string }>(query, ...params);
         console.log(result);
         return result?.commit_sha;
     }

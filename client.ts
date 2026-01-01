@@ -32,6 +32,8 @@ if (privateKey.length !== 32) {
 console.log("Username:", username);
 let endpoint = env['ENDPOINT'] || 'http://localhost:9800';
 
+let argpoint = 2;
+
 async function postData(path: string, content: any) {
     let body = prepare(content, username!, privateKey);
     let resp = await fetch(endpoint+path, {
@@ -47,17 +49,19 @@ async function postData(path: string, content: any) {
 }
 
 async function setUrl() {
-    let version = argv[3];
-    let os = argv[4];
-    let arch = argv[5];
-    let url = argv[6];
-    let commit = argv[7];
-    if (!version || !os || !arch || !url || !commit) {
-        console.error("Usage: node client.js seturl <version> <os> <arch> <url> <commit>");
+    let product = argv[argpoint++];
+    let version = argv[argpoint++];
+    let os = argv[argpoint++];
+    let arch = argv[argpoint++];
+    let url = argv[argpoint++];
+    let commit = argv[argpoint++];
+    if (!product || !version || !os || !arch || !url || !commit) {
+        console.error("Usage: node client.js seturl <product> <version> <os> <arch> <url> <commit>");
         process.exit(1);
     }
 
     let content = {
+        product: product,
         version: version,
         os: os,
         arch: arch,
@@ -69,16 +73,18 @@ async function setUrl() {
 }
 
 async function setTest() {
-    let version = argv[3];
-    let os = argv[4];
-    let arch = argv[5];
-    let tested = argv[6] === "true";
-    if (!version || !os || !arch) {
-        console.error("Usage: node client.js settest <version> <os> <arch> <true|false>");
+    let product = argv[argpoint++];
+    let version = argv[argpoint++];
+    let os = argv[argpoint++];
+    let arch = argv[argpoint++];
+    let tested = argv[argpoint++] === "true";
+    if (!product || !version || !os || !arch) {
+        console.error("Usage: node client.js settest <product> <version> <os> <arch> <true|false>");
         process.exit(1);
     }
 
     let content = {
+        product: product,
         version: version,
         os: os,
         arch: arch,
@@ -89,16 +95,18 @@ async function setTest() {
 }
 
 async function setPublish() {
-    let version = argv[3];
-    let os = argv[4];
-    let arch = argv[5];
-    let published = argv[6] === "true";
-    if (!version || !os || !arch) {
-        console.error("Usage: node client.js setpublish <version> <os> <arch> <true|false>");
+    let product = argv[argpoint++];
+    let version = argv[argpoint++];
+    let os = argv[argpoint++];
+    let arch = argv[argpoint++];
+    let published = argv[argpoint++] === "true";
+    if (!product || !version || !os || !arch) {
+        console.error("Usage: node client.js setpublish <product> <version> <os> <arch> <true|false>");
         process.exit(1);
     }
 
     let content = {
+        product: product,
         version: version,
         os: os,
         arch: arch,
@@ -109,16 +117,18 @@ async function setPublish() {
 }
 
 async function setPack() {
-    let version = argv[3];
-    let os = argv[4];
-    let arch = argv[5];
-    let packed = argv[6] === "true";
-    if (!version || !os || !arch) {
-        console.error("Usage: node client.js setpack <version> <os> <arch> <true|false>");
+    let product = argv[argpoint++];
+    let version = argv[argpoint++];
+    let os = argv[argpoint++];
+    let arch = argv[argpoint++];
+    let packed = argv[argpoint++] === "true";
+    if (!product || !version || !os || !arch) {
+        console.error("Usage: node client.js setpack <product> <version> <os> <arch> <true|false>");
         process.exit(1);
     }
 
     let content = {
+        product: product,
         version: version,
         os: os,
         arch: arch,
@@ -129,16 +139,18 @@ async function setPack() {
 }
 
 async function setPackTested() {
-    let version = argv[3];
-    let os = argv[4];
-    let arch = argv[5];
-    let tested = argv[6] === "true";
-    if (!version || !os || !arch) {
-        console.error("Usage: node client.js setpacktest <version> <os> <arch> <true|false>");
+    let product = argv[argpoint++];
+    let version = argv[argpoint++];
+    let os = argv[argpoint++];
+    let arch = argv[argpoint++];
+    let tested = argv[argpoint++] === "true";
+    if (!product || !version || !os || !arch) {
+        console.error("Usage: node client.js setpacktest <product> <version> <os> <arch> <true|false>");
         process.exit(1);
     }
 
     let content = {
+        product: product,
         version: version,
         os: os,
         arch: arch,
@@ -157,7 +169,7 @@ async function test_auth() {
 }
 
 async function run() {
-    let method = argv[2];
+    let method = argv[argpoint++];
     if (method === "seturl") {
         await setUrl();
     } else if (method === "settest") {
