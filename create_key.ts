@@ -6,10 +6,13 @@ import * as secp256k1 from 'secp256k1';
 import * as sqlite3 from 'sqlite3';
 
 let username = argv[2];
-if (!username) {
-    console.error("Usage: node create_key.js <username>");
+let scopes = argv[3];
+if (!username || !scopes) {
+    console.error("Usage: node create_key.js <username> <scopes(comma separated)>");
     exit(1);
 }
+
+let scopesArray = scopes.split(',');
 
 while (true) {
     let privateKey = randomBytes(32);
@@ -26,8 +29,8 @@ while (true) {
                 }
             });
 
-            db.run(`INSERT INTO users (username, private_key) VALUES (?, ?)`, 
-                [username, privateKey.toString('hex')],
+            db.run(`INSERT INTO users (username, private_key, scopes) VALUES (?, ?, ?)`, 
+                [username, privateKey.toString('hex'), JSON.stringify(scopesArray)],
                 function(err) { 
                     if (err) {
                         console.error("Error inserting data:", err.message);

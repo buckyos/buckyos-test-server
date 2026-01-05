@@ -3,6 +3,9 @@ import * as crypto from "node:crypto";
 import * as secp256k1 from "secp256k1";
 
 function prepare(content: any, username: string, privateKey: Buffer) {
+    if (!content.product) {
+        throw new Error("Content must have a product field");
+    }
     const data = JSON.stringify(content);
     const msg = crypto.createHash('sha256').update(data).digest();
 
@@ -161,7 +164,13 @@ async function setPackTested() {
 }
 
 async function test_auth() {
+    let product = argv[argpoint++];
+    if (!product) {
+        console.error("Usage: node client.js auth <product>");
+        process.exit(1);
+    }
     let content = {
+        product: product,
         msg: "this is a test message",
     }
 

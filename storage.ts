@@ -14,6 +14,7 @@ export class Storage {
         await this.db.run(`CREATE TABLE IF NOT EXISTS "users" (
             "username"	TEXT NOT NULL,
             "private_key"	TEXT NOT NULL,
+            "scopes"    TEXT NOT NULL DEFAULT '[]',
             PRIMARY KEY("username")
         )`);
 
@@ -32,12 +33,12 @@ export class Storage {
         )`);
     }
 
-    public async getUserPrivate(username: string): Promise<string | undefined> {
+    public async getUserInfo(username: string): Promise<[string, string[]] | undefined> {
         if (!this.db) {
             throw new Error("Database not initialized");
         }
-        const result = await this.db.get<any>("SELECT private_key FROM users WHERE username = ?", username);
-        return result?.private_key
+        const result = await this.db.get<any>("SELECT private_key, scopes FROM users WHERE username = ?", username);
+        return result ? [result.private_key, JSON.parse(result.scopes)] : undefined;
     }
 
     public async setVersionUrl(product: string,version: string, os: string, arch: string, url: string, commit: string) {

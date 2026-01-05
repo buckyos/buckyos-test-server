@@ -1,0 +1,21 @@
+{
+  "name": "@buckyos/test-server-client",
+  "version": "1.0.1",
+  "description": "BuckyOS Test Server Client CLI",
+  "bin": {
+    "test-server-client": "./client.js"
+  },
+  "files": [
+    "client.js"
+  ],
+  "keywords": [
+    "buckyos",
+    "test-server",
+    "client"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "secp256k1": "^5.0.1"
+  }
+}

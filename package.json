@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node scripts/prepare-client-package.js",
+    "publish:client": "cd packages/client && npm publish",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -17,6 +18,7 @@
     "@types/sqlite3": "^5.1.0"
   },
   "dependencies": {
+    "@buckyos/test-server-client": "^1.0.1",
     "@koa/bodyparser": "^6.0.0",
     "@koa/router": "^13.1.0",
     "koa": "^3.0.0",
