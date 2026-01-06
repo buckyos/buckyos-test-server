@@ -177,8 +177,18 @@ export class Storage {
         query += " ORDER BY version DESC LIMIT 1"
 
         const result = await this.db.get<{ commit_sha: string }>(query, ...params);
-        console.log(result);
         return result?.commit_sha;
+    }
+
+    public async cleanupVersions(product: string|undefined) {
+        if (!this.db) {
+            throw new Error("Database not initialized");
+        }
+        let deleteUncompleteQuery = "DELETE FROM versions WHERE version IN (SELECT version FROM versions GROUP BY version HAVING COUNT(*) < 6)";
+        await this.db.run(deleteUncompleteQuery);
+
+        let deleteDifferentCommitQuery = "DELETE FROM versions WHERE version IN (SELECT version FROM versions GROUP BY version HAVING COUNT(DISTINCT commit_sha) > 1);"
+        await this.db.run(deleteDifferentCommitQuery);
     }
 
     public async close() {
