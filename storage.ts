@@ -49,6 +49,7 @@ export class Storage {
             `INSERT OR REPLACE INTO versions (product, version, os, arch, url, commit_sha) VALUES (?, ?, ?, ?, ?, ?)`,
             product, version, os, arch, url, commit
         );
+        console.log(`${new Date().toLocaleString()} Set version URL: ${product} ${version} ${os} ${arch} -> ${url}`);
     }
 
     public async setVersionTestResult(product: string, version: string, os: string, arch: string, tested: boolean) {
@@ -59,6 +60,7 @@ export class Storage {
             `UPDATE versions SET tested = ? WHERE product = ? AND version = ? AND os = ? AND arch = ?`,
             tested ? 1 : -1, product, version, os, arch
         );
+        console.log(`${new Date().toLocaleString()} Set version test result: ${product} ${version} ${os} ${arch} -> ${tested}`);
     }
 
     public async setVersionPublishResult(product: string, version: string, os: string, arch: string, published: boolean) {
@@ -69,6 +71,7 @@ export class Storage {
             `UPDATE versions SET published = ? WHERE product = ? AND version = ? AND os = ? AND arch = ?`,
             published ? 1 : -1, product, version, os, arch
         );
+        console.log(`${new Date().toLocaleString()} Set version publish result: ${product} ${version} ${os} ${arch} -> ${published}`);
     }
 
     public async setVersionPackResult(product: string, version: string, os: string, arch: string, packed: boolean) {
@@ -79,6 +82,7 @@ export class Storage {
             `UPDATE versions SET packed = ? WHERE product = ? AND version = ? AND os = ? AND arch = ?`,
             packed ? 1 : -1, product, version, os, arch
         );
+        console.log(`${new Date().toLocaleString()} Set version pack result: ${product} ${version} ${os} ${arch} -> ${packed}`);
     }
 
     public async setVersionPackTestResult(product: string, version: string, os: string, arch: string, pack_tested: boolean) {
@@ -89,6 +93,7 @@ export class Storage {
             `UPDATE versions SET pack_tested = ? WHERE product = ? AND version = ? AND os = ? AND arch = ?`,
             pack_tested ? 1 : -1, product, version, os, arch
         );
+        console.log(`${new Date().toLocaleString()} Set version pack test result: ${product} ${version} ${os} ${arch} -> ${pack_tested}`);
     }
 
     public async getVersions(pageNum: number, pageSize: number, product: string|undefined,version: string| undefined, os: string[] | undefined, arch: string[] | undefined, commit: string|undefined, notest: boolean, nopub: boolean, nopack: boolean) {
