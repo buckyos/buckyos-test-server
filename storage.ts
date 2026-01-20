@@ -109,8 +109,8 @@ export class Storage {
         }
 
         if (version) {
-            query += ` AND version = ?`;
-            params.push(version);
+            query += ` AND version like ?`;
+            params.push(version+"%");
         }
 
         if (commit) {
