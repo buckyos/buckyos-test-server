@@ -2,8 +2,13 @@ import Koa from 'koa';
 import Router from '@koa/router';
 import koaBody from 'koa-body';
 import { authComponent } from './auth';
+import { renderDashboardPage } from './dashboard';
 import { Storage } from './storage';
 import { adjustOsAndArch } from './util';
+
+function hasBaseVersionFields(content: any) {
+    return !!(content?.product && content?.version && content?.os && content?.arch);
+}
 
 async function startServer() {
     const app = new Koa();
@@ -18,6 +23,15 @@ async function startServer() {
     app.use(adjustOsAndArch());
 
     // Define a simple route
+    router.get('/', (ctx) => {
+        ctx.redirect('/dashboard');
+    });
+
+    router.get('/dashboard', (ctx) => {
+        ctx.type = 'html';
+        ctx.body = renderDashboardPage();
+    });
+
     router.post('/version/auth', (ctx) => {
         ctx.body = {
             result: 1,
@@ -43,15 +57,20 @@ async function startServer() {
     })
 
     router.post('/version/test', async (ctx) => {
-        const { product, version, os, arch, tested } = ctx.request.body.content;
-        if (!product || !version || !os || !arch || typeof tested !== 'boolean') {
+        const content = ctx.request.body.content;
+        const { product, version, os, arch, testing, tested } = content;
+        const hasTesting = typeof testing === 'boolean';
+        const hasTested = typeof tested === 'boolean';
+        if (!hasBaseVersionFields(content) || hasTesting === hasTested || testing === false) {
             ctx.status = 400;
-            ctx.body = { error: 'Missing required fields' };
+            ctx.body = { error: 'Invalid test request' };
             return;
         }
 
+        const status = hasTesting ? 2 : (tested ? 1 : -1);
+
         try {
-            await storage.setVersionTestResult(product,version, os, arch, tested);
+            await storage.setVersionTestResult(product,version, os, arch, status);
             ctx.body = { result: 1 };
         } catch (error) {
             ctx.status = 500;
@@ -77,36 +96,24 @@ async function startServer() {
     });
 
     router.post('/version/pack', async (ctx) => {
-        const { product, version, os, arch, packed } = ctx.request.body.content;
-        if (!product || !version || !os || !arch || typeof packed !== 'boolean') {
+        const content = ctx.request.body.content;
+        const { product, version, os, arch, packing, packed } = content;
+        const hasPacking = typeof packing === 'boolean';
+        const hasPacked = typeof packed === 'boolean';
+        if (!hasBaseVersionFields(content) || hasPacking === hasPacked || packing === false) {
             ctx.status = 400;
-            ctx.body = { error: 'Missing required fields' };
+            ctx.body = { error: 'Invalid pack request' };
             return;
         }
 
+        const status = hasPacking ? 2 : (packed ? 1 : -1);
+
         try {
-            await storage.setVersionPackResult(product, version, os, arch, packed);
+            await storage.setVersionPackResult(product, version, os, arch, status);
             ctx.body = { result: 1 };
         } catch (error) {
             ctx.status = 500;
             ctx.body = { error: 'Failed to set version pack result' };
-        }
-    });
-
-    router.post('/version/packtest', async (ctx) => {
-        const { product, version, os, arch, tested } = ctx.request.body.content;
-        if (!product || !version || !os || !arch || typeof tested !== 'boolean') {
-            ctx.status = 400;
-            ctx.body = { error: 'Missing required fields' };
-            return;
-        }
-
-        try {
-            await storage.setVersionPackTestResult(product, version, os, arch, tested);
-            ctx.body = { result: 1 };
-        } catch (error) {
-            ctx.status = 500;
-            ctx.body = { error: 'Failed to set version pack test result' };
         }
     });
 

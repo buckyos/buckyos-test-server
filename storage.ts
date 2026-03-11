@@ -46,21 +46,39 @@ export class Storage {
             throw new Error("Database not initialized");
         }
         await this.db.run(
-            `INSERT OR REPLACE INTO versions (product, version, os, arch, url, commit_sha) VALUES (?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO versions (
+                product,
+                version,
+                os,
+                arch,
+                tested,
+                published,
+                packed,
+                pack_tested,
+                url,
+                commit_sha
+            ) VALUES (?, ?, ?, ?, 0, 0, 0, 0, ?, ?)
+            ON CONFLICT(product, version, os, arch) DO UPDATE SET
+                tested = 0,
+                published = 0,
+                packed = 0,
+                pack_tested = 0,
+                url = excluded.url,
+                commit_sha = excluded.commit_sha`,
             product, version, os, arch, url, commit
         );
         console.log(`${new Date().toLocaleString()} Set version URL: ${product} ${version} ${os} ${arch} -> ${url}`);
     }
 
-    public async setVersionTestResult(product: string, version: string, os: string, arch: string, tested: boolean) {
+    public async setVersionTestResult(product: string, version: string, os: string, arch: string, status: number) {
         if (!this.db) {
             throw new Error("Database not initialized");
         }
         await this.db.run(
-            `UPDATE versions SET tested = ? WHERE product = ? AND version = ? AND os = ? AND arch = ?`,
-            tested ? 1 : -1, product, version, os, arch
+            `UPDATE versions SET pack_tested = ? WHERE product = ? AND version = ? AND os = ? AND arch = ?`,
+            status, product, version, os, arch
         );
-        console.log(`${new Date().toLocaleString()} Set version test result: ${product} ${version} ${os} ${arch} -> ${tested}`);
+        console.log(`${new Date().toLocaleString()} Set version test result: ${product} ${version} ${os} ${arch} -> ${status}`);
     }
 
     public async setVersionPublishResult(product: string, version: string, os: string, arch: string, published: boolean) {
@@ -74,26 +92,15 @@ export class Storage {
         console.log(`${new Date().toLocaleString()} Set version publish result: ${product} ${version} ${os} ${arch} -> ${published}`);
     }
 
-    public async setVersionPackResult(product: string, version: string, os: string, arch: string, packed: boolean) {
+    public async setVersionPackResult(product: string, version: string, os: string, arch: string, status: number) {
         if (!this.db) {
             throw new Error("Database not initialized");
         }
         await this.db.run(
             `UPDATE versions SET packed = ? WHERE product = ? AND version = ? AND os = ? AND arch = ?`,
-            packed ? 1 : -1, product, version, os, arch
+            status, product, version, os, arch
         );
-        console.log(`${new Date().toLocaleString()} Set version pack result: ${product} ${version} ${os} ${arch} -> ${packed}`);
-    }
-
-    public async setVersionPackTestResult(product: string, version: string, os: string, arch: string, pack_tested: boolean) {
-        if (!this.db) {
-            throw new Error("Database not initialized");
-        }
-        await this.db.run(
-            `UPDATE versions SET pack_tested = ? WHERE product = ? AND version = ? AND os = ? AND arch = ?`,
-            pack_tested ? 1 : -1, product, version, os, arch
-        );
-        console.log(`${new Date().toLocaleString()} Set version pack test result: ${product} ${version} ${os} ${arch} -> ${pack_tested}`);
+        console.log(`${new Date().toLocaleString()} Set version pack result: ${product} ${version} ${os} ${arch} -> ${status}`);
     }
 
     public async getVersions(pageNum: number, pageSize: number, product: string|undefined,version: string| undefined, os: string[] | undefined, arch: string[] | undefined, commit: string|undefined, notest: boolean, nopub: boolean, nopack: boolean) {
@@ -129,7 +136,7 @@ export class Storage {
         }
 
         if (notest) {
-            query += ` AND tested = 0`;
+            query += ` AND pack_tested = 0`;
         }
 
         if (nopub) {
