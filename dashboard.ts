@@ -424,7 +424,7 @@ export function renderDashboardPage(): string {
                     os: '',
                     arch: '',
                     packed: '',
-                    pack_tested: '',
+                    tested: '',
                     published: ''
             }
         };
@@ -441,7 +441,7 @@ export function renderDashboardPage(): string {
             os: document.getElementById('filter-os'),
             arch: document.getElementById('filter-arch'),
             packed: document.getElementById('filter-packed'),
-            pack_tested: document.getElementById('filter-pack-tested'),
+            tested: document.getElementById('filter-pack-tested'),
             published: document.getElementById('filter-published')
         };
 
@@ -514,7 +514,7 @@ export function renderDashboardPage(): string {
                 if (state.filters.packed !== '' && String(item.packed) !== state.filters.packed) {
                     return false;
                 }
-                if (state.filters.pack_tested !== '' && String(item.pack_tested) !== state.filters.pack_tested) {
+                if (state.filters.tested !== '' && String(item.tested) !== state.filters.tested) {
                     return false;
                 }
                 if (state.filters.published !== '' && String(item.published) !== state.filters.published) {
@@ -526,9 +526,9 @@ export function renderDashboardPage(): string {
 
         function renderStats(items) {
             const waitingPack = items.filter((item) => Number(item.packed) === 0).length;
-            const waitingTest = items.filter((item) => Number(item.pack_tested) === 0).length;
+            const waitingTest = items.filter((item) => Number(item.tested) === 0).length;
             const publishingDone = items.filter((item) => Number(item.published) === 1).length;
-            const failed = items.filter((item) => Number(item.packed) === -1 || Number(item.pack_tested) === -1 || Number(item.published) === -1).length;
+            const failed = items.filter((item) => Number(item.packed) === -1 || Number(item.tested) === -1 || Number(item.published) === -1).length;
             const stats = [
                 { label: '当前结果数', value: items.length },
                 { label: '未打包', value: waitingPack },
@@ -558,7 +558,7 @@ export function renderDashboardPage(): string {
 
             nodes.table.innerHTML = items.map((item) => {
                 const packed = statusMeta('packed', item.packed);
-                const packTested = statusMeta('pack_tested', item.pack_tested);
+                const packTested = statusMeta('tested', item.tested);
                 const published = statusMeta('published', item.published);
                 const tested = statusMeta('tested', item.tested);
                 return '<tr>' +
@@ -567,7 +567,7 @@ export function renderDashboardPage(): string {
                     '<td>' + escapeHtml(item.os) + '</td>' +
                     '<td>' + escapeHtml(item.arch) + '</td>' +
                     '<td><span class="status ' + packed.cls + '">' + packed.label + ' (' + escapeHtml(item.packed) + ')</span></td>' +
-                    '<td><span class="status ' + packTested.cls + '">' + packTested.label + ' (' + escapeHtml(item.pack_tested) + ')</span></td>' +
+                    '<td><span class="status ' + packTested.cls + '">' + packTested.label + ' (' + escapeHtml(item.tested) + ')</span></td>' +
                     '<td><span class="status ' + published.cls + '">' + published.label + ' (' + escapeHtml(item.published) + ')</span></td>' +
                     '<td><span class="status ' + tested.cls + '">' + tested.label + ' (' + escapeHtml(item.tested) + ')</span></td>' +
                     '<td><code>' + escapeHtml(item.commit_sha) + '</code></td>' +
@@ -581,7 +581,7 @@ export function renderDashboardPage(): string {
             state.filters.os = nodes.os.value;
             state.filters.arch = nodes.arch.value;
             state.filters.packed = nodes.packed.value;
-            state.filters.pack_tested = nodes.pack_tested.value;
+            state.filters.tested = nodes.tested.value;
             state.filters.published = nodes.published.value;
         }
 
@@ -630,14 +630,14 @@ export function renderDashboardPage(): string {
                 os: '',
                 arch: '',
                 packed: '',
-                pack_tested: '',
+                tested: '',
                 published: ''
             };
             nodes.version.value = '';
             nodes.os.value = '';
             nodes.arch.value = '';
             nodes.packed.value = '';
-            nodes.pack_tested.value = '';
+            nodes.tested.value = '';
             nodes.published.value = '';
             refreshView();
         }
@@ -645,10 +645,10 @@ export function renderDashboardPage(): string {
         populateSelect(nodes.os, [{ value: '', label: '全部 OS' }]);
         populateSelect(nodes.arch, [{ value: '', label: '全部 Arch' }]);
         populateSelect(nodes.packed, STATUS_OPTIONS);
-        populateSelect(nodes.pack_tested, STATUS_OPTIONS);
+        populateSelect(nodes.tested, STATUS_OPTIONS);
         populateSelect(nodes.published, PUBLISH_OPTIONS);
 
-        [nodes.version, nodes.os, nodes.arch, nodes.packed, nodes.pack_tested, nodes.published].forEach((node) => {
+        [nodes.version, nodes.os, nodes.arch, nodes.packed, nodes.tested, nodes.published].forEach((node) => {
             node.addEventListener('input', refreshView);
             node.addEventListener('change', refreshView);
         });

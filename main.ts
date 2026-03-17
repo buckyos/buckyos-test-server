@@ -47,6 +47,7 @@ async function startServer() {
             ctx.body = { result: 1 };
         } catch (error) {
             ctx.status = 500;
+            console.log("Error setting version URL:", error);
             ctx.body = { error: 'Failed to set version URL' };
         }
     })

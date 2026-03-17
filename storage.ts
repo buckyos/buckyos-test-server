@@ -26,7 +26,6 @@ export class Storage {
             "tested"	INTEGER NOT NULL DEFAULT 0,
             "published"	INTEGER NOT NULL DEFAULT 0,
             "packed"	INTEGER NOT NULL DEFAULT 0,
-            "pack_tested" INTEGER NOT NULL DEFAULT 0,
             "url"	TEXT NOT NULL,
             "commit_sha" TEXT NOT NULL,
             PRIMARY KEY("product", "version","os","arch")
@@ -54,15 +53,13 @@ export class Storage {
                 tested,
                 published,
                 packed,
-                pack_tested,
                 url,
                 commit_sha
-            ) VALUES (?, ?, ?, ?, 0, 0, 0, 0, ?, ?)
+            ) VALUES (?, ?, ?, ?, 0, 0, 0, ?, ?)
             ON CONFLICT(product, version, os, arch) DO UPDATE SET
                 tested = 0,
                 published = 0,
                 packed = 0,
-                pack_tested = 0,
                 url = excluded.url,
                 commit_sha = excluded.commit_sha`,
             product, version, os, arch, url, commit
@@ -75,7 +72,7 @@ export class Storage {
             throw new Error("Database not initialized");
         }
         await this.db.run(
-            `UPDATE versions SET pack_tested = ? WHERE product = ? AND version = ? AND os = ? AND arch = ?`,
+            `UPDATE versions SET tested = ? WHERE product = ? AND version = ? AND os = ? AND arch = ?`,
             status, product, version, os, arch
         );
         console.log(`${new Date().toLocaleString()} Set version test result: ${product} ${version} ${os} ${arch} -> ${status}`);
@@ -136,7 +133,7 @@ export class Storage {
         }
 
         if (notest) {
-            query += ` AND pack_tested = 0`;
+            query += ` AND tested = 0`;
         }
 
         if (nopub) {
