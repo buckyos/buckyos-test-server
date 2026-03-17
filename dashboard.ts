@@ -326,7 +326,7 @@ export function renderDashboardPage(): string {
                 <p>按 product 分 tab 查看版本记录，并支持按版本、平台、commit、状态和 URL 做前端过滤。当前直接展示原始 <code>url</code> 字段。</p>
             </div>
             <div class="hero-meta">
-                <span class="chip">数据源: <code>GET /version?size=0</code></span>
+                <span class="chip">数据源: <code>GET /version/?size=0</code></span>
                 <span class="chip">视图: 单页前端</span>
                 <span class="chip" id="last-refresh">最近刷新: -</span>
             </div>
@@ -603,7 +603,7 @@ export function renderDashboardPage(): string {
         async function loadData() {
             setLoading('正在加载数据...');
             try {
-                const response = await fetch('/version?size=0');
+                const response = await fetch('/version/?size=0');
                 if (!response.ok) {
                     throw new Error('HTTP ' + response.status);
                 }
