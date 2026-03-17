@@ -22,12 +22,7 @@ async function startServer() {
     app.use(authComponent(storage));
     app.use(adjustOsAndArch());
 
-    // Define a simple route
-    router.get('/', (ctx) => {
-        ctx.redirect('/dashboard');
-    });
-
-    router.get('/dashboard', (ctx) => {
+    router.get('/version/dashboard', (ctx) => {
         ctx.type = 'html';
         ctx.body = renderDashboardPage();
     });
